@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Nhóm 1 - Trừ tồn theo QC Pass
+         Vị trí kho phụ "Khu chờ QC": cây vải nhập về (từ PO) nằm ở đây
+         trước. KHÔNG đặt làm con của WH/Stock — nếu đặt làm con, cơ chế
+         reservation của Lệnh Cắt (mrp.production, nguồn = WH/Stock) sẽ vẫn
+         tìm thấy quant trong các vị trí con và "đặt chỗ" nhầm hàng chưa
+         PASS. Từ Odoo 19, node cha "Physical Locations"
+         (stock.stock_location_locations) không còn tồn tại trong module
+         stock nữa (kho được tạo phẳng, không còn view-location gốc dùng
+         chung) nên KHÔNG set location_id — để trống, location này sẽ là
+         một vị trí gốc (root), tách bạch hoàn toàn khỏi cây vị trí mà
+         Lệnh Cắt dùng để đặt chỗ nguyên liệu. -->
+    <!-- Odoo 19 đã bỏ field "comment" khỏi model stock.location (còn ở các
+         bản rất cũ, nay không còn nữa) nên không thể set qua XML data như
+         trước — ghi lại mô tả ở đây dưới dạng comment XML thay vì field:
+         Vị trí tạm giữ cây vải mới nhập, chưa PASS QC (FR - Nhóm 1).
+         Cây vải chỉ được tự động chuyển vào kho chính khi được đánh dấu
+         PASS trên stock.lot. Không dùng vị trí này làm nguồn nguyên liệu
+         cho Lệnh Cắt. -->
+    <record id="location_qc_quarantine" model="stock.location">
+        <field name="name">Khu chờ QC</field>
+        <field name="usage">internal</field>
+    </record>
+</odoo>

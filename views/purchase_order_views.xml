@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_purchase_order_form_fabric" model="ir.ui.view">
+        <field name="name">purchase.order.form.fabric</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button class="oe_stat_button" type="object" name="action_view_fabric_returns"
+                        icon="fa-exchange" invisible="fabric_return_count == 0">
+                    <field name="fabric_return_count" widget="statinfo" string="Đổi trả/Lãnh bù"/>
+                </button>
+                <button class="oe_stat_button" type="object" name="action_view_vnpay_transactions"
+                        icon="fa-credit-card" invisible="vnpay_transaction_count == 0">
+                    <field name="vnpay_transaction_count" widget="statinfo" string="Lịch sử VNPay"/>
+                </button>
+            </xpath>
+            <xpath expr="//header" position="inside">
+                <button name="action_pay_supplier_vnpay" type="object"
+                        string="Thanh toán phần còn lại cho NCC" class="btn-primary"
+                        invisible="amount_residual &lt;= 0 or payment_state in ('paid', 'not_billed') or not is_qc_fully_passed or not deposit_invoice_paid"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="payment_state" widget="badge" invisible="payment_state == 'not_billed'"
+                       decoration-success="payment_state == 'paid'"
+                       decoration-warning="payment_state in ('partial', 'in_payment')"
+                       decoration-danger="payment_state == 'not_paid'"
+                       decoration-muted="payment_state == 'reversed'"/>
+                <field name="is_qc_fully_passed" widget="boolean_toggle" readonly="1"
+                       invisible="state not in ('purchase', 'done')"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Thanh toán" name="fabric_purchase_payment_page"
+                      invisible="payment_state == 'not_billed'">
+                    <group>
+                        <group string="Công nợ phải trả NCC">
+                            <field name="payment_state"/>
+                            <field name="amount_billed"/>
+                            <field name="amount_residual"/>
+                        </group>
+                    </group>
+                </page>
+                <page string="Cọc mua vải" name="fabric_deposit_page">
+                    <group>
+                        <group string="Cấu hình cọc">
+                            <field name="deposit_percent" readonly="state in ('purchase', 'done', 'cancel')"/>
+                            <field name="deposit_amount" readonly="1"/>
+                        </group>
+                        <group string="Hoá đơn cọc">
+                            <field name="deposit_invoice_id"/>
+                            <field name="deposit_invoice_paid"/>
+                        </group>
+                    </group>
+                    <button name="action_pay_deposit_vnpay" type="object"
+                            string="Thanh toán cọc" class="btn-primary"
+                            invisible="not deposit_invoice_id or deposit_invoice_paid"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_partner_form_fabric" model="ir.ui.view">
+        <field name="name">res.partner.form.fabric</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_button_box')]" position="after">
+                <group string="Đánh giá Nhà cung cấp vải" name="fabric_kpi"
+                    invisible="purchase_order_count == 0">
+                    <field name="fabric_return_count"/>
+                    <field name="fabric_return_rate"/>
+                </group>
+                <group string="Chính sách mua vải" name="fabric_purchase_policy"
+                    invisible="supplier_rank == 0">
+                    <field name="fabric_deposit_percent"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_purchase_order_form_fabric_lines" model="ir.ui.view">
+        <field name="name">purchase.order.form.fabric.lines</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_qty']" position="after">
+                <field name="fabric_demand_qty" optional="show"/>
+                <field name="production_id" optional="show"/>
+                <field name="fabric_color_code" optional="show"/>
+                <field name="swatch_card_image" widget="image" class="oe_avatar" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

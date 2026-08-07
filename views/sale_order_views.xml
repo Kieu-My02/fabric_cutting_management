@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_order_form_fabric" model="ir.ui.view">
+        <field name="name">sale.order.form.fabric</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='action_confirm']" position="before">
+                <button name="action_compute_fabric_requirement" type="object"
+                        string="Tính nhu cầu vải theo màu"
+                        invisible="state == 'cancel'"/>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button class="oe_stat_button" type="object" name="action_compute_fabric_requirement"
+                        icon="fa-calculator" invisible="not order_line">
+                    <field name="fabric_need_count" widget="statinfo" string="Mã vải cần"/>
+                </button>
+                <button class="oe_stat_button" type="object" name="action_view_productions"
+                        icon="fa-scissors" invisible="not production_ids">
+                    <field name="production_count" widget="statinfo" string="Lệnh Cắt"/>
+                </button>
+                <button class="oe_stat_button" type="object" name="action_view_purchase_orders"
+                        icon="fa-credit-card" invisible="purchase_order_count == 0">
+                    <field name="purchase_order_count" widget="statinfo" string="Đơn mua"/>
+                </button>
+                <button class="oe_stat_button" type="object" name="action_view_fabric_release_pickings"
+                        icon="fa-truck" invisible="fabric_release_count == 0">
+                    <field name="fabric_release_count" widget="statinfo" string="Xuất vải"/>
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="payment_state" widget="badge" invisible="payment_state == 'not_invoiced'"
+                       decoration-success="payment_state == 'paid'"
+                       decoration-warning="payment_state in ('partial', 'in_payment')"
+                       decoration-danger="payment_state == 'not_paid'"
+                       decoration-muted="payment_state == 'reversed'"/>
+                <field name="fabric_outbound_state" widget="badge" invisible="fabric_release_count == 0"
+                       decoration-success="fabric_outbound_state == 'done'"
+                       decoration-warning="fabric_outbound_state == 'partial'"
+                       decoration-muted="fabric_outbound_state == 'pending'"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Nhu cầu vải theo màu " name="fabric_need_page"
+                      invisible="fabric_need_count == 0">
+                    <field name="fabric_need_ids" readonly="1">
+                        <list string="Nhu cầu vải" create="false" edit="false" delete="false">
+                            <field name="product_id"/>
+                            <field name="product_tmpl_id" optional="hide"/>
+                            <field name="qty_needed" sum="Tổng" string="Nhu cầu (KH)"/>
+                            <field name="qty_issued" sum="Tổng" string="Đã xuất (TT)"/>
+                            <field name="qty_variance" sum="Tổng" string="Chênh lệch"
+                                   decoration-danger="qty_variance &lt; 0"
+                                   decoration-success="qty_variance &gt;= 0"/>
+                            <field name="qty_variance_percent" optional="show" string="% Chênh lệch"/>
+                            <field name="uom_id"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="SX &amp; Thanh toán " name="fabric_insight_page"
+                      invisible="not production_ids">
+                    <group>
+                        <group string="Thanh toán">
+                            <field name="payment_state"/>
+                            <field name="amount_invoiced"/>
+                            <field name="amount_residual"/>
+                        </group>
+                    </group>
+                    <field name="production_ids" readonly="1">
+                        <list string="Lệnh Cắt liên quan" create="false" edit="false" delete="false">
+                            <field name="name"/>
+                            <field name="state" widget="badge"/>
+                            <field name="production_stage" widget="badge"
+                                   decoration-success="production_stage == 'completed'"
+                                   decoration-info="production_stage == 'sewing'"
+                                   decoration-muted="production_stage == 'cutting'"/>
+                            <field name="date_finished" optional="show"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="Mua hàng &amp; Xuất vải" name="fabric_purchase_outbound_page"
+                      invisible="purchase_order_count == 0 and fabric_release_count == 0">
+                    <group>
+                        <group string="Mua hàng">
+                            <field name="purchase_order_count"/>
+                            <field name="purchase_payment_state" widget="badge"
+                                   decoration-success="purchase_payment_state == 'paid'"
+                                   decoration-warning="purchase_payment_state in ('partial', 'in_payment')"
+                                   decoration-danger="purchase_payment_state == 'not_paid'"
+                                   decoration-muted="purchase_payment_state in ('none', 'not_billed', 'reversed')"/>
+                        </group>
+                        <group string="Xuất vải cho Phòng Cắt">
+                            <field name="fabric_release_count"/>
+                            <field name="fabric_outbound_state" widget="badge"
+                                   decoration-success="fabric_outbound_state == 'done'"
+                                   decoration-warning="fabric_outbound_state == 'partial'"
+                                   decoration-muted="fabric_outbound_state == 'pending'"/>
+                        </group>
+                    </group>
+                    <field name="purchase_order_ids" readonly="1" invisible="purchase_order_count == 0">
+                        <list string="Đơn mua liên quan" create="false" edit="false" delete="false">
+                            <field name="name"/>
+                            <field name="partner_id"/>
+                            <field name="state" widget="badge"/>
+                            <field name="payment_state" widget="badge"/>
+                            <field name="amount_total" sum="Tổng"/>
+                        </list>
+                    </field>
+                    <field name="fabric_release_picking_ids" readonly="1"
+                           invisible="fabric_release_count == 0">
+                        <list string="Phiếu xuất vải cho Phòng Cắt" create="false" edit="false" delete="false">
+                            <field name="name"/>
+                            <field name="state" widget="badge"/>
+                            <field name="scheduled_date"/>
+                            <field name="date_done" optional="show"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

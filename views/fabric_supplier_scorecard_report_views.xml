@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_fabric_supplier_scorecard_report_search" model="ir.ui.view">
+        <field name="name">fabric.supplier.scorecard.report.search</field>
+        <field name="model">fabric.supplier.scorecard.report</field>
+        <field name="arch" type="xml">
+            <search string="Thẻ điểm đánh giá Nhà cung cấp ">
+                <field name="partner_id"/>
+                <separator/>
+                <filter string="Cảnh báo rủi ro" name="filter_risk_alert"
+                        domain="[('supplier_risk_alert', '=', True)]"/>
+                <filter string="Có PO trong tháng" name="filter_has_po"
+                        domain="[('po_count', '&gt;', 0)]"/>
+                <separator/>
+                <filter string="Đã từng bị Vải lỗi" name="filter_defect"
+                        domain="[('defect_return_count', '&gt;', 0)]"/>
+                <group>
+                    <filter string="Nhà cung cấp" name="groupby_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Công ty" name="groupby_company" context="{'group_by': 'company_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_fabric_supplier_scorecard_report_list" model="ir.ui.view">
+        <field name="name">fabric.supplier.scorecard.report.list</field>
+        <field name="model">fabric.supplier.scorecard.report</field>
+        <field name="arch" type="xml">
+            <list string="Thẻ điểm đánh giá Nhà cung cấp " create="false" edit="false" delete="false"
+                  decoration-danger="supplier_risk_alert">
+                <field name="partner_id"/>
+                <field name="po_count" sum="Tổng"/>
+                <field name="po_amount_total" sum="Tổng"/>
+                <field name="lot_count" sum="Tổng" optional="show"/>
+                <field name="qc_pass_rate"
+                       decoration-danger="qc_pass_rate &lt; 90 and lot_count &gt; 0"
+                       decoration-muted="lot_count == 0"/>
+                <field name="avg_yards_variance_percent" optional="hide"/>
+                <field name="total_return_count" sum="Tổng" optional="show"/>
+                <field name="defect_return_rate" decoration-danger="defect_return_rate &gt; 10"/>
+                <field name="avg_lead_time_days" optional="show"/>
+                <field name="supplier_risk_alert" optional="hide"/>
+                <field name="currency_id" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fabric_supplier_scorecard_report_kanban" model="ir.ui.view">
+        <field name="name">fabric.supplier.scorecard.report.kanban</field>
+        <field name="model">fabric.supplier.scorecard.report</field>
+        <field name="arch" type="xml">
+            <kanban string="Thẻ điểm đánh giá Nhà cung cấp" class="o_kanban_dashboard">
+                <field name="partner_id"/>
+                <field name="po_count"/>
+                <field name="po_amount_total"/>
+                <field name="qc_pass_rate"/>
+                <field name="lot_count"/>
+                <field name="defect_return_rate"/>
+                <field name="avg_lead_time_days"/>
+                <field name="total_return_count"/>
+                <field name="supplier_risk_alert"/>
+                <templates>
+                    <t t-name="card" t-attf-class="{{ record.supplier_risk_alert.raw_value ? 'oe_kanban_card_danger' : '' }}">
+                        <div class="oe_kanban_global_click p-2">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <strong><field name="partner_id"/></strong>
+                                <span t-if="record.supplier_risk_alert.raw_value" class="badge text-bg-danger">
+                                    Rủi ro
+                                </span>
+                            </div>
+                            <div class="row mt-2 text-center">
+                                <div class="col-4">
+                                    <div class="fw-bold"><field name="po_count"/></div>
+                                    <div class="text-muted small">Số PO</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="fw-bold" t-attf-class="{{ record.lot_count.raw_value == 0 ? 'text-muted' : (record.qc_pass_rate.raw_value &lt; 90 ? 'text-danger' : 'text-success') }}">
+                                        <field name="qc_pass_rate" t-if="record.lot_count.raw_value &gt; 0"/>
+                                        <span t-else="">Chưa QC</span>
+                                    </div>
+                                    <div class="text-muted small">PASS QC</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="fw-bold" t-attf-class="{{ record.defect_return_rate.raw_value &gt; 10 ? 'text-danger' : '' }}">
+                                        <field name="defect_return_rate"/>
+                                    </div>
+                                    <div class="text-muted small">Đổi trả lỗi</div>
+                                </div>
+                            </div>
+                            <div class="text-muted small mt-1">
+                                Lead time TB: <field name="avg_lead_time_days"/> ngày
+                                &#183; <field name="total_return_count"/> phiếu Đổi trả/Lãnh bù
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_fabric_supplier_scorecard_report_pivot" model="ir.ui.view">
+        <field name="name">fabric.supplier.scorecard.report.pivot</field>
+        <field name="model">fabric.supplier.scorecard.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Thẻ điểm đánh giá Nhà cung cấp ">
+                <field name="partner_id" type="row"/>
+                <field name="po_count" type="measure"/>
+                <field name="po_amount_total" type="measure"/>
+                <field name="lot_count" type="measure"/>
+                <field name="qc_pass_rate" type="measure"/>
+                <field name="defect_return_rate" type="measure"/>
+                <field name="avg_lead_time_days" type="measure"/>
+                <field name="total_return_count" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_fabric_supplier_scorecard_report_graph" model="ir.ui.view">
+        <field name="name">fabric.supplier.scorecard.report.graph</field>
+        <field name="model">fabric.supplier.scorecard.report</field>
+        <field name="arch" type="xml">
+            <graph string="Thẻ điểm đánh giá Nhà cung cấp" type="bar">
+                <field name="partner_id"/>
+                <field name="qc_pass_rate" type="measure"/>
+                <field name="defect_return_rate" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_fabric_supplier_scorecard_report" model="ir.actions.act_window">
+        <field name="name">Thẻ điểm Nhà cung cấp </field>
+        <field name="res_model">fabric.supplier.scorecard.report</field>
+        <field name="view_mode">kanban,list,pivot,graph</field>
+        <field name="context">{'search_default_filter_has_po': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smart_action">
+                Chưa có Nhà cung cấp nào có PO đã xác nhận để đánh giá.
+            </p>
+            <p>
+                Nhóm 10 - Thống kê tùy nhu cầu: gộp lại quy mô mua hàng, tỷ lệ PASS QC,
+                độ lệch yards, số lần Đổi trả/Lãnh bù và lead time thực tế trung
+                bình theo từng Nhà cung cấp - dùng để xếp hạng/so sánh nhanh, không cần
+                mở từng báo cáo hay từng form riêng lẻ.
+            </p>
+        </field>
+    </record>
+</odoo>

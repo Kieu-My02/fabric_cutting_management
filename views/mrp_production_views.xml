@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_mrp_production_form_fabric" model="ir.ui.view">
+        <field name="name">mrp.production.form.fabric</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <button name="action_assign" position="after">
+                <button name="action_suggest_fabric_rolls" type="object"
+                        string="Gợi ý cây vải theo ánh màu"
+                        invisible="state not in ('confirmed', 'progress', 'to_close')"/>
+                <button name="action_mark_stage_sewing" type="object"
+                        string="Chuyển sang giai đoạn May"
+                        invisible="production_stage != 'cutting' or state in ('draft', 'cancel')"/>
+            </button>
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="production_stage" widget="badge"
+                       decoration-success="production_stage == 'completed'"
+                       decoration-info="production_stage == 'sewing'"
+                       decoration-muted="production_stage == 'cutting'"/>
+            </xpath>
+            <xpath expr="//notebook" position="before">
+                <group string="Nhóm 5-6: Đơn hàng &amp; Thanh toán liên quan" name="fabric_insight_group"
+                       invisible="not sale_order_id">
+                    <field name="sale_order_id" readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

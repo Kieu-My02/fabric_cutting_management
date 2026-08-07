@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Nhóm 7 (bổ sung) - VNPay: payment.method riêng vì đây là phương
+         thức đặc thù thị trường VN, khác với các method chuẩn (card, wire)
+         Odoo core đã seed sẵn trong module payment. -->
+    <record id="payment_method_vnpay" model="payment.method">
+        <field name="name">VNPay</field>
+        <field name="code">vnpay</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <record id="payment_provider_vnpay" model="payment.provider">
+        <field name="name">VNPay</field>
+        <field name="code">vnpay</field>
+        <!-- Mặc định disabled - Nhóm phải tự bật 'test' sau khi nhập
+             vnp_TmnCode/vnp_HashSecret từ tài khoản Sandbox, tránh lộ
+             provider chưa cấu hình lên trang thanh toán thật. -->
+        <field name="state">disabled</field>
+        <field name="payment_method_ids" eval="[(6, 0, [ref('payment_method_vnpay')])]"/>
+    </record>
+</odoo>

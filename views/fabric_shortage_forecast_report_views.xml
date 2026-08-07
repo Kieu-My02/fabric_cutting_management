@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_fabric_shortage_forecast_report_search" model="ir.ui.view">
+        <field name="name">fabric.shortage.forecast.report.search</field>
+        <field name="model">fabric.shortage.forecast.report</field>
+        <field name="arch" type="xml">
+            <search string="Dự báo thiếu vải">
+                <field name="product_id"/>
+                <field name="fabric_color_code"/>
+                <filter string="Cảnh báo thiếu vải" name="filter_alert" domain="[('shortage_alert', '=', True)]"/>
+                <separator/>
+                <filter string="Cần đặt hàng ngay (đã trễ hạn)" name="filter_overdue"
+                        domain="[('days_until_reorder', '&lt;=', 0)]"/>
+                <group>
+                    <filter string="Loại vải" name="groupby_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Mã màu" name="groupby_color" context="{'group_by': 'fabric_color_code'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_fabric_shortage_forecast_report_list" model="ir.ui.view">
+        <field name="name">fabric.shortage.forecast.report.list</field>
+        <field name="model">fabric.shortage.forecast.report</field>
+        <field name="arch" type="xml">
+            <list string="Dự báo thiếu vải" create="false" edit="false" delete="false"
+                  decoration-danger="shortage_alert">
+                <field name="product_id"/>
+                <field name="fabric_color_code"/>
+                <field name="avg_daily_consumption"/>
+                <field name="onhand_qty"/>
+                <field name="safety_stock_qty" optional="show"/>
+                <field name="reorder_point_qty"/>
+                <field name="qty_to_order" sum="Tổng" decoration-danger="qty_to_order > 0"/>
+                <field name="days_until_reorder" decoration-danger="days_until_reorder &lt;= 0"/>
+                <field name="suggested_reorder_date" decoration-danger="shortage_alert"/>
+                <field name="uom_id" optional="show"/>
+                <field name="lead_time_days" optional="hide"/>
+                <field name="days_history" optional="hide"/>
+                <field name="shortage_alert" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fabric_shortage_forecast_report_pivot" model="ir.ui.view">
+        <field name="name">fabric.shortage.forecast.report.pivot</field>
+        <field name="model">fabric.shortage.forecast.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Dự báo thiếu vải">
+                <field name="product_id" type="row"/>
+                <field name="fabric_color_code" type="row"/>
+                <field name="onhand_qty" type="measure"/>
+                <field name="reorder_point_qty" type="measure"/>
+                <field name="qty_to_order" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_fabric_shortage_forecast_report_graph" model="ir.ui.view">
+        <field name="name">fabric.shortage.forecast.report.graph</field>
+        <field name="model">fabric.shortage.forecast.report</field>
+        <field name="arch" type="xml">
+            <graph string="Dự báo thiếu vải" type="bar">
+                <field name="product_id"/>
+                <field name="qty_to_order" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_fabric_shortage_forecast_report" model="ir.actions.act_window">
+        <field name="name">Dự báo thiếu vải </field>
+        <field name="res_model">fabric.shortage.forecast.report</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="context">{'search_default_filter_alert': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smart_action">
+                Chưa có đủ lịch sử xuất kho để dự báo.
+            </p>
+            <p>
+                Báo cáo tổng hợp lịch sử xuất kho theo mã vải + màu, tính tốc độ tiêu thụ
+                trung bình/ngày, tồn an toàn và Điểm đặt hàng lại (Reorder Point), rồi so
+                với tồn khả dụng hiện tại (đã qua QC PASS) để gợi ý số lượng cần nhập thêm
+                và ngày nên đặt hàng, dựa trên thời gian giao hàng của Nhà cung cấp khai
+                báo trên mã hàng (mặc định 15 ngày lead time / 7 ngày tồn an toàn).
+            </p>
+        </field>
+    </record>
+</odoo>

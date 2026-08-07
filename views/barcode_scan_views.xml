@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_fabric_barcode_scan_form" model="ir.ui.view">
+        <field name="name">fabric.barcode.scan.form</field>
+        <field name="model">fabric.barcode.scan</field>
+        <field name="arch" type="xml">
+            <form string="Quét mã vạch cây vải">
+                <group>
+                    <field name="scan_type" widget="radio"/>
+                    <field name="barcode" placeholder="Quét hoặc gõ mã cây vải..."/>
+                    <field name="lot_id" readonly="1"/>
+                    <field name="result_message" readonly="1" invisible="not result_message"/>
+                    <field name="picking_id" readonly="1" invisible="not picking_id"/>
+                </group>
+                <footer>
+                    <button name="action_process_scan" type="object" string="Xử lý"
+                            class="btn-primary"/>
+                    <button string="Đóng" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fabric_barcode_scan" model="ir.actions.act_window">
+        <field name="name">Quét mã vạch cây vải</field>
+        <field name="res_model">fabric.barcode.scan</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

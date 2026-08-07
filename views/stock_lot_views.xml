@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_production_lot_form_fabric" model="ir.ui.view">
+        <field name="name">stock.lot.form.fabric</field>
+        <field name="model">stock.lot</field>
+        <field name="inherit_id" ref="stock.view_production_lot_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="Thông tin cây vải" name="fabric_info">
+                    <group>
+                        <field name="roll_sequence"/>
+                        <field name="fabric_supplier_id"/>
+                        <field name="dye_lot_number"/>
+                    </group>
+                    <group>
+                        <field name="fabric_width"/>
+                        <field name="fabric_color_code"/>
+                        <field name="fabric_gsm"/>
+                    </group>
+                </group>
+                <group string="Quy đổi Kg ⇄ Yards " name="fabric_conversion">
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not yards_variance_alert">
+                        ⚠ Số yards đo tay lệch quá 3% so với số liệu quy đổi theo Kg — vui lòng
+                        kiểm tra lại cân/đo hoặc định lượng (GSM) khai báo.
+                    </div>
+                    <group>
+                        <field name="actual_weight_kg"/>
+                        <field name="actual_yards"/>
+                    </group>
+                    <group>
+                        <field name="actual_yards_theoretical" readonly="1"/>
+                        <field name="yards_variance_percent" readonly="1"
+                               decoration-danger="yards_variance_alert"/>
+                    </group>
+                </group>
+                <group string="Kiểm tra chất lượng (QC)" name="fabric_qc">
+                    <field name="qc_state" widget="badge"
+                           decoration-success="qc_state == 'pass'"
+                           decoration-danger="qc_state == 'fail'"
+                           decoration-warning="qc_state == 'pending'"/>
+                    <field name="qty_in_qc_quarantine" readonly="1"/>
+                    <field name="qc_note"/>
+                </group>
+            </xpath>
+            <xpath expr="//sheet" position="before">
+                <header>
+                    <button name="action_set_qc_pass" type="object" string="Đánh dấu PASS"
+                            class="btn-success" invisible="qc_state == 'pass'"
+                            groups="fabric_cutting_management.group_fabric_qc"/>
+                    <button name="action_set_qc_fail" type="object" string="Đánh dấu FAIL"
+                            class="btn-danger" invisible="qc_state == 'fail'"
+                            groups="fabric_cutting_management.group_fabric_qc"/>
+                </header>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button name="action_view_lot_traceability" type="object"
+                        class="oe_stat_button" icon="fa-history">
+                    <field name="move_line_count" widget="statinfo" string="Truy vết "/>
+                </button>
+                <button name="action_view_lot_cutting_productions" type="object"
+                        class="oe_stat_button" icon="fa-scissors"
+                        invisible="cutting_production_count == 0">
+                    <field name="cutting_production_count" widget="statinfo" string="Lệnh Cắt"/>
+                </button>
+                <button name="action_view_lot_return_requests" type="object"
+                        class="oe_stat_button" icon="fa-exchange"
+                        invisible="fabric_return_count == 0">
+                    <field name="fabric_return_count" widget="statinfo" string="Đổi trả/Lãnh bù"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_production_lot_list_fabric" model="ir.ui.view">
+        <field name="name">stock.lot.list.fabric</field>
+        <field name="model">stock.lot</field>
+        <field name="inherit_id" ref="stock.view_production_lot_tree"/>
+        <field name="arch" type="xml">
+            <field name="product_qty" position="after">
+                <field name="dye_lot_number" optional="show"/>
+                <field name="qc_state" widget="badge"
+                       decoration-success="qc_state == 'pass'"
+                       decoration-danger="qc_state == 'fail'"
+                       decoration-warning="qc_state == 'pending'"/>
+                <field name="yards_variance_percent" optional="show"
+                       decoration-danger="yards_variance_alert"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- FR-11: Truy vết real-time trên toàn bộ cây vải — tái dùng thẳng
+         action + view stock.move.line chuẩn của Odoo (stock.stock_move_line_action),
+         chỉ lọc lại domain cho đúng phạm vi "vải" (theo dõi bằng Lot và được
+         đánh dấu cờ is_fabric), không tạo view/model truy vết riêng. -->
+    <record id="action_fabric_lot_traceability" model="ir.actions.act_window">
+        <field name="name">Truy vết cây vải</field>
+        <field name="res_model">stock.move.line</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('lot_id', '!=', False),
+                               ('product_id.product_tmpl_id.is_fabric', '=', True)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smart_action">Chưa có lượt di chuyển cây vải nào.</p>
+            <p>
+                Toàn bộ lịch sử di chuyển real-time của các cây vải: nhập kho từ PO, xuất
+                cho Lệnh Cắt, trả về kho... Mở form một cây vải cụ thể trong menu
+                "Cây vải (Lot/Serial)" và bấm nút "Truy vết " để xem chi tiết một Roll.
+            </p>
+        </field>
+    </record>
+</odoo>

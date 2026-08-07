@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_fabric_production_insight_report_search" model="ir.ui.view">
+        <field name="name">fabric.production.insight.report.search</field>
+        <field name="model">fabric.production.insight.report</field>
+        <field name="arch" type="xml">
+            <search string="Tổng hợp SX - Thanh toán">
+                <field name="production_id"/>
+                <field name="sale_order_id"/>
+                <field name="partner_id"/>
+                <field name="main_fabric_supplier_id"/>
+                <separator/>
+                <filter string="Đã hoàn thành SX" name="filter_done" domain="[('state', '=', 'done')]"/>
+                <filter string="Đang thực hiện" name="filter_progress"
+                        domain="[('state', 'in', ('progress', 'to_close'))]"/>
+                <separator/>
+                <filter string="Vượt ngưỡng định mức" name="filter_variance_alert"
+                        domain="[('fabric_variance_alert', '=', True)]"/>
+                <separator/>
+                <filter string="Chưa thanh toán" name="filter_not_paid"
+                        domain="[('payment_state', '=', 'not_paid')]"/>
+                <filter string="Còn phải thu" name="filter_residual"
+                        domain="[('amount_residual', '&gt;', 0)]"/>
+                <filter string="Đã thanh toán đủ" name="filter_paid"
+                        domain="[('payment_state', '=', 'paid')]"/>
+                <separator/>
+                <filter string="Theo tháng" name="filter_this_month"
+                        domain="[('date_finished', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <group>
+                    <filter string="Giai đoạn SX" name="groupby_stage" context="{'group_by': 'production_stage'}"/>
+                    <filter string="Trạng thái Lệnh Cắt" name="groupby_state" context="{'group_by': 'state'}"/>
+                    <filter string="Tình trạng thanh toán" name="groupby_payment"
+                            context="{'group_by': 'payment_state'}"/>
+                    <filter string="Khách hàng" name="groupby_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Đơn hàng bán" name="groupby_sale_order" context="{'group_by': 'sale_order_id'}"/>
+                    <filter string="Ngày hoàn thành" name="groupby_date_finished"
+                            context="{'group_by': 'date_finished:month'}"/>
+                    <filter string="NCC cấp vải chính" name="groupby_main_supplier"
+                            context="{'group_by': 'main_fabric_supplier_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_fabric_production_insight_report_list" model="ir.ui.view">
+        <field name="name">fabric.production.insight.report.list</field>
+        <field name="model">fabric.production.insight.report</field>
+        <field name="arch" type="xml">
+            <list string="Tổng hợp SX - Thanh toán" create="false" edit="false" delete="false"
+                  decoration-danger="fabric_variance_alert" decoration-success="state == 'done' and payment_state == 'paid'">
+                <field name="production_id"/>
+                <field name="production_stage" widget="badge"
+                       decoration-success="production_stage == 'completed'"
+                       decoration-info="production_stage == 'sewing'"
+                       decoration-muted="production_stage == 'cutting'"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-info="state in ('progress', 'to_close')"
+                       decoration-muted="state in ('draft', 'cancel')"/>
+                <field name="date_finished" optional="show"/>
+                <field name="sale_order_id"/>
+                <field name="partner_id" optional="show"/>
+                <field name="payment_state" widget="badge"
+                       decoration-success="payment_state == 'paid'"
+                       decoration-warning="payment_state in ('partial', 'in_payment')"
+                       decoration-danger="payment_state == 'not_paid'"/>
+                <field name="amount_total" sum="Tổng" optional="show"/>
+                <field name="amount_residual" sum="Tổng"/>
+                <field name="related_production_count" optional="show"
+                       decoration-warning="related_production_count &gt; 1"/>
+                <field name="fabric_planned_qty" sum="Tổng" optional="show"/>
+                <field name="fabric_actual_qty" sum="Tổng" optional="show"/>
+                <field name="fabric_variance_percent" decoration-danger="fabric_variance_alert"/>
+                <field name="fabric_variance_alert" optional="hide"/>
+                <field name="production_lead_time_days" optional="hide"/>
+                <field name="main_fabric_supplier_id" optional="hide"/>
+                <field name="currency_id" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fabric_production_insight_report_pivot" model="ir.ui.view">
+        <field name="name">fabric.production.insight.report.pivot</field>
+        <field name="model">fabric.production.insight.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Tổng hợp SX - Thanh toán">
+                <field name="production_stage" type="row"/>
+                <field name="main_fabric_supplier_id" type="row"/>
+                <field name="payment_state" type="col"/>
+                <field name="fabric_planned_qty" type="measure"/>
+                <field name="fabric_actual_qty" type="measure"/>
+                <field name="fabric_variance_percent" type="measure"/>
+                <field name="production_lead_time_days" type="measure"/>
+                <field name="amount_total" type="measure"/>
+                <field name="amount_residual" type="measure"/>
+                <field name="related_production_count" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_fabric_production_insight_report_graph" model="ir.ui.view">
+        <field name="name">fabric.production.insight.report.graph</field>
+        <field name="model">fabric.production.insight.report</field>
+        <field name="arch" type="xml">
+            <graph string="Tổng hợp SX - Thanh toán" type="bar">
+                <field name="production_stage"/>
+                <field name="amount_residual" type="measure"/>
+                <field name="fabric_variance_percent" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_fabric_production_insight_report" model="ir.actions.act_window">
+        <field name="name">Tổng quan Insights </field>
+        <field name="res_model">fabric.production.insight.report</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="context">{'search_default_filter_this_month': 0}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smart_action">
+                Chưa có Lệnh Cắt nào dùng vải để tổng hợp.
+            </p>
+            <p>
+                Dashboard gộp 3 mảng: giai đoạn SX (Cắt/May/Hoàn thành), tình trạng thanh
+                toán của Đơn hàng bán tương ứng, và cảnh báo chênh lệch định mức - mỗi
+                dòng ứng với 1 Lệnh Cắt. Xem chi tiết từng dòng nguyên liệu tại
+                Báo cáo &gt; Chênh lệch định mức.
+            </p>
+            <p>
+                Nhóm 10 - Thống kê tùy nhu cầu: đã bổ sung thêm Số ngày SX thực tế và
+                NCC cấp vải chính - có thể kéo thả tự do trong Pivot để lập thống kê
+                tùy biến theo nhu cầu.
+            </p>
+        </field>
+    </record>
+</odoo>

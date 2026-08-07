@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_fabric_return_request_user,fabric.return.request.user,model_fabric_return_request,group_fabric_user,1,1,1,0
+access_fabric_return_request_manager,fabric.return.request.manager,model_fabric_return_request,group_fabric_manager,1,1,1,1
+access_fabric_shortage_wizard_user,fabric.shortage.wizard.user,model_fabric_shortage_wizard,group_fabric_user,1,1,1,1
+access_fabric_barcode_scan_user,fabric.barcode.scan.user,model_fabric_barcode_scan,group_fabric_user,1,1,1,1
+access_fabric_norm_variance_report_user,fabric.norm.variance.report.user,model_fabric_norm_variance_report,group_fabric_user,1,0,0,0
+access_fabric_shortage_forecast_report_user,fabric.shortage.forecast.report.user,model_fabric_shortage_forecast_report,group_fabric_user,1,0,0,0
+access_fabric_production_insight_report_user,fabric.production.insight.report.user,model_fabric_production_insight_report,group_fabric_user,1,0,0,0
+access_fabric_supplier_scorecard_report_user,fabric.supplier.scorecard.report.user,model_fabric_supplier_scorecard_report,group_fabric_user,1,0,0,0
+access_sale_order_fabric_need_salesman,sale.order.fabric.need.salesman,model_sale_order_fabric_need,sales_team.group_sale_salesman,1,1,1,1
+access_sale_order_fabric_need_fabric_user,sale.order.fabric.need.fabric.user,model_sale_order_fabric_need,group_fabric_user,1,0,0,0
+access_fabric_consolidated_po_wizard_user,fabric.consolidated.po.wizard.user,model_fabric_consolidated_po_wizard,group_fabric_user,1,1,1,1
+access_fabric_consolidated_po_wizard_line_user,fabric.consolidated.po.wizard.line.user,model_fabric_consolidated_po_wizard_line,group_fabric_user,1,1,1,1

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_fabric_root" name="Cấp phát Vải" sequence="25"
+              groups="group_fabric_user"/>
+
+    <menuitem id="menu_fabric_insights" name="Tổng quan"
+              parent="menu_fabric_root" sequence="5"/>
+
+    <menuitem id="menu_fabric_insights_production" name="SX - Thanh toán - Định mức"
+              parent="menu_fabric_insights" action="action_fabric_production_insight_report" sequence="10"/>
+
+    <menuitem id="menu_fabric_insights_supplier" name="Thẻ điểm Nhà cung cấp"
+              parent="menu_fabric_insights" action="action_fabric_supplier_scorecard_report" sequence="20"/>
+
+    <menuitem id="menu_fabric_insights_powerbi" name="Power BI"
+              parent="menu_fabric_insights" action="action_fabric_powerbi_dashboard" sequence="30"/>
+
+    <menuitem id="menu_fabric_operations" name="Nghiệp vụ" parent="menu_fabric_root" sequence="10"/>
+
+    <menuitem id="menu_fabric_return_request" name="Đổi trả / Lãnh bù"
+              parent="menu_fabric_operations" action="action_fabric_return_request" sequence="10"/>
+
+    <menuitem id="menu_fabric_shortage_wizard" name="Báo xuất thiếu"
+              parent="menu_fabric_operations" action="action_fabric_shortage_wizard" sequence="20"/>
+
+    <menuitem id="menu_fabric_barcode_scan" name="Quét mã vạch"
+              parent="menu_fabric_operations" action="action_fabric_barcode_scan" sequence="30"/>
+
+    <menuitem id="menu_fabric_consolidated_po_wizard" name="Gộp PO theo mã vải/màu"
+              parent="menu_fabric_operations" action="action_fabric_consolidated_po_wizard"
+              sequence="40"/>
+
+    <menuitem id="menu_fabric_lots" name="Cây vải"
+              parent="menu_fabric_root" action="stock.action_production_lot_form" sequence="20"/>
+
+    <menuitem id="menu_fabric_reports" name="Báo cáo" parent="menu_fabric_root" sequence="30"/>
+
+    <menuitem id="menu_fabric_traceability_report" name="Truy vết cây vải "
+              parent="menu_fabric_reports" action="action_fabric_lot_traceability" sequence="5"/>
+
+    <menuitem id="menu_fabric_norm_variance_report" name="Chênh lệch định mức "
+              parent="menu_fabric_reports" action="action_fabric_norm_variance_report" sequence="10"/>
+
+    <menuitem id="menu_fabric_shortage_forecast_report" name="Dự báo thiếu vải "
+              parent="menu_fabric_reports" action="action_fabric_shortage_forecast_report" sequence="20"/>
+
+    <menuitem id="menu_fabric_config" name="Cấu hình" parent="menu_fabric_root" sequence="90"
+              groups="group_fabric_manager"/>
+</odoo>

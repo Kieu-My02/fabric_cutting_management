@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_fabric_return_request_list" model="ir.ui.view">
+        <field name="name">fabric.return.request.list</field>
+        <field name="model">fabric.return.request</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="request_type == 'defect'"
+                  decoration-warning="state == 'draft'"
+                  decoration-success="state == 'resolved'">
+                <field name="name"/>
+                <field name="request_type"/>
+                <field name="product_id"/>
+                <field name="quantity"/>
+                <field name="partner_id"/>
+                <field name="requested_date"/>
+                <field name="expected_date"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fabric_return_request_form" model="ir.ui.view">
+        <field name="name">fabric.return.request.form</field>
+        <field name="model">fabric.return.request</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" type="object" string="Xác nhận"
+                            class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_notify_supplier" type="object" string="Báo Nhà cung cấp"
+                            class="btn-primary" invisible="state != 'confirmed' or request_type == 'excess'"/>
+                    <button name="action_create_replenishment_po" type="object" string="Tạo PO bổ sung"
+                            class="btn-primary"
+                            invisible="state not in ('confirmed','supplier_notified') or request_type == 'excess'"/>
+                    <button name="action_create_return_picking" type="object" string="Tạo phiếu trả kho"
+                            class="btn-primary"
+                            invisible="state != 'confirmed' or request_type != 'excess'"/>
+                    <button name="action_cancel" type="object" string="Hủy"
+                            invisible="state in ('resolved','cancel')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,supplier_notified,resolved"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="request_type"/>
+                            <field name="product_id"/>
+                            <field name="quantity"/>
+                            <field name="product_uom_id"/>
+                            <field name="lot_id"/>
+                        </group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="purchase_order_id"/>
+                            <field name="requested_date"/>
+                            <field name="expected_date"/>
+                        </group>
+                    </group>
+                    <group string="Lý do">
+                        <field name="reason" nolabel="1"/>
+                    </group>
+                    <group string="Kết quả xử lý" invisible="not replenishment_po_id and not return_picking_id">
+                        <field name="replenishment_po_id" readonly="1"/>
+                        <field name="return_picking_id" readonly="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_fabric_return_request_search" model="ir.ui.view">
+        <field name="name">fabric.return.request.search</field>
+        <field name="model">fabric.return.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="partner_id"/>
+                <field name="purchase_order_id"/>
+                <filter string="Chưa xử lý xong" name="not_resolved" domain="[('state', 'not in', ('resolved','cancel'))]"/>
+                <group>
+                    <filter string="Loại yêu cầu" name="group_by_type" context="{'group_by': 'request_type'}"/>
+                    <filter string="Trạng thái" name="group_by_state" context="{'group_by': 'state'}"/>
+                    <filter string="Nhà cung cấp" name="group_by_partner" context="{'group_by': 'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_fabric_return_request" model="ir.actions.act_window">
+        <field name="name">Đổi trả / Lãnh bù vải</field>
+        <field name="res_model">fabric.return.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_fabric_return_request_search"/>
+        <field name="context">{'search_default_not_resolved': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smart_action">Tạo yêu cầu đổi trả, lãnh bù hoặc trả vải dư đầu tiên.</p>
+        </field>
+    </record>
+</odoo>

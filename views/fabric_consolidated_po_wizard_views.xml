@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_fabric_consolidated_po_wizard_form" model="ir.ui.view">
+        <field name="name">fabric.consolidated.po.wizard.form</field>
+        <field name="model">fabric.consolidated.po.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Gộp PO theo mã vải/màu ">
+                <p class="text-muted">
+                    Chọn nhiều Lệnh Cắt và/hoặc Đơn hàng bán đang cần cùng mã vải/màu, bấm
+                    "Cộng dồn nhu cầu" để hệ thống tự cộng tổng nhu cầu theo từng mã vải/màu,
+                    trừ đi tồn khả dụng hiện có (đã QC PASS), rồi sinh 1 PO tổng cho phần còn thiếu.
+                </p>
+                <group>
+                    <field name="production_ids" widget="many2many_tags"
+                           options="{'no_create': True}"
+                           readonly="line_count != 0"/>
+                    <field name="sale_order_ids" widget="many2many_tags"
+                           options="{'no_create': True}"
+                           readonly="line_count != 0"/>
+                </group>
+                <div class="oe_button_box" invisible="line_count != 0">
+                    <button name="action_compute_lines" type="object" string="Cộng dồn nhu cầu"
+                            class="btn-primary"/>
+                </div>
+                <field name="line_ids" invisible="line_count == 0">
+                    <list string="Nhu cầu gộp theo mã vải/màu" editable="bottom">
+                        <field name="product_id" readonly="1"/>
+                        <field name="product_tmpl_id" optional="hide" readonly="1"/>
+                        <field name="source_display" optional="show" readonly="1"/>
+                        <field name="qty_needed" sum="Tổng nhu cầu" readonly="1"/>
+                        <field name="onhand_qty" sum="Tổng tồn" readonly="1"/>
+                        <field name="uom_id" readonly="1"/>
+                        <field name="qty_to_order" sum="Tổng cần đặt"/>
+                        <field name="partner_id" required="qty_to_order > 0"/>
+                        <field name="price_unit"/>
+                    </list>
+                </field>
+                <group invisible="line_count == 0">
+                    <field name="total_qty_to_order"/>
+                </group>
+                <footer>
+                    <button name="action_compute_lines" type="object"
+                            string="Tính lại nhu cầu" class="btn-secondary"
+                            invisible="line_count == 0"/>
+                    <button name="action_create_purchase_orders" type="object"
+                            string="Tạo PO tổng" class="btn-primary"
+                            invisible="line_count == 0"/>
+                    <button string="Đóng" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fabric_consolidated_po_wizard" model="ir.actions.act_window">
+        <field name="name">Gộp PO theo mã vải/màu</field>
+        <field name="res_model">fabric.consolidated.po.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Chọn nhiều Lệnh Cắt (mrp.production) trong danh sách -> Action -->
+    <record id="action_fabric_consolidated_po_from_production" model="ir.actions.act_window">
+        <field name="name">Gộp PO theo mã vải/màu</field>
+        <field name="res_model">fabric.consolidated.po.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="mrp.model_mrp_production"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+    <!-- Chọn nhiều Đơn hàng bán (sale.order) trong danh sách -> Action -->
+    <record id="action_fabric_consolidated_po_from_sale_order" model="ir.actions.act_window">
+        <field name="name">Gộp PO theo mã vải/màu</field>
+        <field name="res_model">fabric.consolidated.po.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_view_types">list</field>
+    </record>
+</odoo>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_fabric_norm_variance_report_search" model="ir.ui.view">
+        <field name="name">fabric.norm.variance.report.search</field>
+        <field name="model">fabric.norm.variance.report</field>
+        <field name="arch" type="xml">
+            <search string="Chênh lệch định mức Cắt">
+                <field name="production_id"/>
+                <field name="product_id"/>
+                <field name="lot_id"/>
+                <filter string="Đã hoàn thành" name="filter_done" domain="[('state', '=', 'done')]"/>
+                <filter string="Đang thực hiện" name="filter_progress" domain="[('state', 'in', ('progress', 'to_close'))]"/>
+                <separator/>
+                <filter string="Vượt ngưỡng cảnh báo" name="filter_alert" domain="[('variance_alert', '=', True)]"/>
+                <separator/>
+                <filter string="Theo tháng" name="filter_this_month"
+                        domain="[('move_date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <separator/>
+                <filter string="Giai đoạn: Đang cắt" name="filter_stage_cutting"
+                        domain="[('production_stage', '=', 'cutting')]"/>
+                <filter string="Giai đoạn: Đang may" name="filter_stage_sewing"
+                        domain="[('production_stage', '=', 'sewing')]"/>
+                <filter string="Giai đoạn: Hoàn thành" name="filter_stage_completed"
+                        domain="[('production_stage', '=', 'completed')]"/>
+                <group>
+                    <filter string="Lệnh Cắt" name="groupby_production" context="{'group_by': 'production_id'}"/>
+                    <filter string="Loại vải" name="groupby_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Trạng thái" name="groupby_state" context="{'group_by': 'state'}"/>
+                    <filter string="Giai đoạn SX" name="groupby_stage"
+                            context="{'group_by': 'production_stage'}"/>
+                    <filter string="Ngày" name="groupby_date" context="{'group_by': 'move_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_fabric_norm_variance_report_list" model="ir.ui.view">
+        <field name="name">fabric.norm.variance.report.list</field>
+        <field name="model">fabric.norm.variance.report</field>
+        <field name="arch" type="xml">
+            <list string="Chênh lệch định mức Cắt" create="false" edit="false" delete="false"
+                  decoration-danger="variance_alert">
+                <field name="move_date"/>
+                <field name="production_id"/>
+                <field name="product_id"/>
+                <field name="lot_id" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-info="state in ('progress', 'to_close')"
+                       decoration-muted="state in ('draft', 'cancel')"/>
+                <field name="production_stage" widget="badge" optional="show"
+                       decoration-success="production_stage == 'completed'"
+                       decoration-info="production_stage == 'sewing'"
+                       decoration-muted="production_stage == 'cutting'"/>
+                <field name="planned_qty" sum="Tổng"/>
+                <field name="actual_qty" sum="Tổng"/>
+                <field name="variance_qty" sum="Tổng"/>
+                <field name="variance_percent" decoration-danger="variance_alert"/>
+                <field name="uom_id" optional="show"/>
+                <field name="variance_alert" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fabric_norm_variance_report_pivot" model="ir.ui.view">
+        <field name="name">fabric.norm.variance.report.pivot</field>
+        <field name="model">fabric.norm.variance.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Chênh lệch định mức Cắt">
+                <field name="product_id" type="row"/>
+                <field name="move_date" type="col" interval="month"/>
+                <field name="planned_qty" type="measure"/>
+                <field name="actual_qty" type="measure"/>
+                <field name="variance_qty" type="measure"/>
+                <field name="variance_percent" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_fabric_norm_variance_report_graph" model="ir.ui.view">
+        <field name="name">fabric.norm.variance.report.graph</field>
+        <field name="model">fabric.norm.variance.report</field>
+        <field name="arch" type="xml">
+            <graph string="Chênh lệch định mức Cắt" type="bar">
+                <field name="product_id"/>
+                <field name="variance_percent" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_fabric_norm_variance_report" model="ir.actions.act_window">
+        <field name="name">Chênh lệch định mức</field>
+        <field name="res_model">fabric.norm.variance.report</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="context">{'search_default_filter_this_month': 0}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smart_action">
+                Chưa có dữ liệu tiêu thụ vải nào cho Lệnh Cắt.
+            </p>
+            <p>
+                Báo cáo so sánh Định mức lý thuyết (theo BoM của Lệnh Cắt) với số lượng
+                vải thực tế đã xuất dùng, tự động cảnh báo khi chênh lệch vượt ngưỡng
+                cho phép (khai báo trên mã hàng, hoặc mặc định 5%).
+            </p>
+        </field>
+    </record>
+</odoo>
